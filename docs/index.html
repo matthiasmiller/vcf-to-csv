@@ -11,6 +11,26 @@
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
+            min-height: 100vh;
+            position: relative;
+        }
+        body.active {
+            background-color: #e6f7ff;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            border: 2px dashed transparent;
+            z-index: 1000;
+            transition: border-color 0.3s;
+        }
+        body.active::before {
+            border-color: #1890ff;
         }
         h1 {
             text-align: center;
@@ -86,7 +106,7 @@
     <h1>VCF to CSV Converter</h1>
     
     <div class="drop-zone" id="drop-zone">
-        <p>Drag and drop VCF files here or click to select files</p>
+        <p>Drag and drop VCF files anywhere on this page or click to select files</p>
         <input type="file" id="file-input" accept=".vcf" multiple style="display: none;">
     </div>
     
@@ -116,17 +136,24 @@
             // Event listeners for drag and drop
             dropZone.addEventListener('click', () => fileInput.click());
             
-            dropZone.addEventListener('dragover', (e) => {
+            // Make the entire document a drop zone
+            document.addEventListener('dragover', (e) => {
                 e.preventDefault();
+                document.body.classList.add('active');
                 dropZone.classList.add('active');
             });
             
-            dropZone.addEventListener('dragleave', () => {
-                dropZone.classList.remove('active');
+            document.addEventListener('dragleave', (e) => {
+                // Only remove active class if we're leaving the document
+                if (!e.relatedTarget || e.relatedTarget.nodeName === 'HTML') {
+                    document.body.classList.remove('active');
+                    dropZone.classList.remove('active');
+                }
             });
             
-            dropZone.addEventListener('drop', (e) => {
+            document.addEventListener('drop', (e) => {
                 e.preventDefault();
+                document.body.classList.remove('active');
                 dropZone.classList.remove('active');
                 handleFiles(e.dataTransfer.files);
             });
